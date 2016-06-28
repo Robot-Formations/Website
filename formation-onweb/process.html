@@ -1,0 +1,230 @@
+﻿<html>
+   <!--<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>-->
+   <script src="jquery.min.js"></script>
+<script>
+		var Step = {
+		Step1:"The Xbee on the beacon sends a broadcast telling the workers to listen for an ultrasonic signal.\n\nSimultaneously the beacon sends an ultrasonic pulse and the worker begins listening for it. (The Xbee allows the Pings on two robots to be in sync.)\n\nThe receiving robot measures the time difference from the radio pulse arrival and the Ping signal arrival.\n\nThis time represents how long the ultrasonic burst traveled through the air.\n\nUsing D=rt we can estimate the distance between the robots.\n\nDuring testing, we didn’t account for the Xbee's delay in reading/sending messages from the buffer and after adding a constant delay time the readings became accurate.\n\nAlso, the Pings can only start listening for a burst after sending one, so the worker robots transmitters were blocked off or desoldered to avoid the workers sending unnecessary noise.",
+		Step2:"Each robot turns randomly at first then reaches a local optimum based on the change in distance.\n\nBeacon robot periodically queries the workers using P2P communication to check for completion. \n\nWhen distance between worker and master is minimized, the worker records its compass heading.\n\nDuring testing, the worker often recorded noisy data. In order to filter these outliers and inspired by stock market statistics, we decided to use a rolling mean where n = 5(as described using the expression to the left)",
+		Step3:"Each robot’s polar coordinate(compass heading and distance to beacon) is converted to Cartesian.\n\nIf the robot coordinates are concave, the convex hull of the coordinates is determined using Jarvis March to get a convex shape.\n\nThe centroid of the convex hull is calculated.\n\nThe coordinates of the polygon are calculated using the centroid as its center and the input side length.",
+		Step4:"Each robot’s distance to the points of the polygon are calculated and ranked sequentially\n\nThe first robot is assigned the point on the polygon closest to it, the next robot chooses the next closest point, and so on…\n\nTo maximize the shortest distances and minimize the longest ones, the coordinates of the polygon are moved and distances to the robots are recalculated until the average distance approaches the target.",
+		Step5:"\n\nThe coordinate of each robot and its corrosponding polygon verticies coordinate is converted into a polar coordinate system relative to each robot so that the robot can move to the designated final coordinate using a compass heading and a distance to move.",
+		Step6:""
+		}; 
+		var StepTitle = {
+		Step1:"Distance of Time Over Flight",
+		Step2:"Calculate distance between workers and beacon.",
+		Step3:"Coordinate Evaluation and Polygon Creation",
+		Step4:"Point Assignment and Optimizaion",
+		Step5:"Move to Coordinate",
+		Step6:""
+		};
+		var imgExtension = {Step1:".gif",Step2:".jpg",Step3:".png",Step4:".png",Step5:".jpg",Step6:".jpg"};
+		var CurrentStep = "None";
+		$(document).ready(function (){
+			$(".stepTitle").click(function(e){								
+				var id = $(this).attr("id");
+				if (CurrentStep!="None")
+				$("#li" + CurrentStep).animate({'margin-top':'0',fontSize: '1em','height':'70px'});
+				if (CurrentStep!=id){
+				$("#li" + id).animate({'margin-top':'115px',fontSize: '2em','height':'400px'},800, function() {
+					$("#stepdesbkg").fadeOut(400, function() {
+						$("#StepPic").attr('src',"images/steps/"+id+imgExtension[id]);
+						if(id == "Step6"){
+							$("#StepPic").css("display","none");
+							$("iframe").fadeIn(400);
+						}
+						else{
+							$("#StepPic").css("display","inline-block");
+							$("iframe").css("display","none");
+						}
+						var escaped = $('<div>').text(Step[id]).text();
+						$('#StepDes').html(escaped.replace(/\n/g, '<br />'));
+						<!--$("#StepDes").text(Step[id]);-->
+						$("#StepTitle").text(StepTitle[id]);
+						if(id == "Step4" || id == "Step5"){
+							$("#StepTitle").css({"float":"left","padding-left":"5%","margin-right":"20%"});
+							$("#StepPic").css("padding-top","1%");
+						}
+						else{
+							$("#StepTitle").css({"float":"right","padding-left":"0%","margin-right":"0%"});
+							$("#StepPic").css("padding-top","15%");
+						}
+					})
+					.fadeIn(400);
+				});
+				CurrentStep = id;				
+				}
+				else{
+					CurrentStep="None";
+					$("#stepdesbkg").fadeOut(400);
+				}
+				
+			});
+		});			
+</script>
+
+<style>
+body{
+    margin:0;
+	background-color:#EDE2DC;
+}
+
+#navbar {
+  height: 70px;
+  background-color: #027D85;
+  box-shadow: 0px 6px 7px rgba(0, 0, 0, 0.4);
+  width: auto;
+  text-align: center;
+}
+#navbar > ul {
+    list-style-type: none;
+    margin: 0 auto;
+    padding: 0;
+    overflow: hidden;
+	text-align: center;
+	}
+
+#navbar li {
+    float: left;
+	position: relative;
+	width:18%;
+	height:70px;
+} 
+
+a:link, a:visited {
+    display: block;
+    color: #FFFFFF;
+	font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    background-color:#027D85;
+    text-align: center;
+    padding: 26px 40px;
+    text-decoration: none;
+    text-transform: uppercase;
+	-webkit-transition: background-color .5s;
+	-moz-transition: background-color .5s;
+	-o-transition: background-color .5s;
+	transition: background-color .5s;
+}
+
+a:hover, a.active {
+    background-color: #074959;
+}
+
+#steps {
+  
+  height: 70px;
+  background-color: #FFFFFF;
+  box-shadow: 0px 6px 7px rgba(0, 0, 0, 0.4);
+  width: 70%;
+  text-align: center;
+  border-radius: 25px;
+  margin-left:15%;
+  margin-top:3%;
+  }
+
+#steps > ul {
+    list-style-type: none;
+    margin: 0 auto;
+    padding: 0;
+	padding-left:3%;
+	padding-right:3%;
+    overflow: hidden;
+	text-align: center;
+	}
+
+#steps li {
+    float: left;
+	position: relative;
+	width:16%;
+	height: 70px;
+} 
+
+#steps > ul > li > .stepTitle  {
+	margin:0;
+    display: block;
+    color: black;
+	cursor:pointer;
+	font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    background-color:#FFFFFF;
+    text-align: center;
+    padding: 26px 40px;
+    text-decoration: none;
+    text-transform: uppercase;
+	-webkit-transition: background-color .5s;
+	-moz-transition: background-color .5s;
+	-o-transition: background-color .5s;
+	transition: background-color .5s;
+}
+
+#steps .stepTitle:hover,#steps .stepTitle.active {
+    background-color: #dededd;
+}
+
+#stepdesbkg{
+width:70%;
+height:60%;
+background-color:#FFFFFF;
+margin: 0 auto;
+margin-top:2%;
+  border-radius: 10px;
+    box-shadow: 0px 6px 7px rgba(0, 0, 0, 0.4);
+	display:none;
+	overflow:auto;
+}
+#stepTitle{
+	float:right;
+	width:40%;
+	height:auto;
+	padding-right:5%;
+	padding-top:2%;
+	font-size: 2em;
+	margin-bottom:20px;
+}
+
+
+#StepPic{
+float:left;
+width:40%;
+height:auto;
+padding-left:5%;
+padding-top:15%;
+}
+
+#stepDes{
+	float:right;
+	width:40%;
+	height:auto;
+	padding-right:5%;
+}
+
+
+</style>
+<body>
+
+<div id= "navbar">
+<ul>
+  <li><a id = "home" href="index.html">Home</a></li>
+  <li><a id = "hardware" href="hardware.html">Hardware</a></li>
+  <li><a id = "Software" href="software.html">Software</a></li>
+  <li><a id = "process" href="process.html"  class="active">Project Process</a></li>
+</ul>
+</div>
+<div id = "steps">
+<ul id = "stepstable">
+  <li id = "liStep1"><p id = "Step1" class="stepTitle">Step 1</p></li>
+  <li id = "liStep2"><p id = "Step2" class="stepTitle">Step 2</p></li>
+  <li id = "liStep3"><p id = "Step3" class="stepTitle">Step 3</p></li>
+  <li id = "liStep4"><p id = "Step4" class="stepTitle">Step 4</p></li>
+  <li id = "liStep5"><p id = "Step5" class="stepTitle">Step 5</p></li>
+  <li id = "liStep6"><p id = "Step6" class="stepTitle">Demo</p></li>
+</ul>
+</div>
+
+<div id = "stepdesbkg" >
+<p id = "StepTitle"> Step 1 Title </p>
+<img id = "StepPic" src = "images/Step1.gif" alt="Step Picture">
+<p id = "StepDes">Step Description<p> 
+<iframe style = "display : none; padding-left:10%" width="560" height="315" src="https://www.youtube.com/embed/LbauM9xDicU" frameborder="0" allowfullscreen></iframe>
+</div>
+
+</html>
